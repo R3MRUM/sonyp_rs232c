@@ -1,1 +1,1 @@
-from SonyHWXXES import SonyHWXXES
+from sonyp_rs232c import SonyHWXXES

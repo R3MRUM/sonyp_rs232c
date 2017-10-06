@@ -1,4 +1,8 @@
 from setuptools import setup
+from distutils.core import setup
+
+with open('README') as file:
+    long_description = file.read()
 
 setup(name='sonyp_rs232c',
       version='0.1',
@@ -10,8 +14,7 @@ setup(name='sonyp_rs232c',
       license='GPLv3+',
       packages=['sonyp_rs232c'],
       classifiers=[
-      	"Development Status :: 1 - Planning",
+      	"Development Status :: 4 - Beta",
       	"Topic :: Home Automation",
       	"License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"],
-      long_description=read('README'),
-      zip_safe=False)
+     long_description=long_description)

@@ -1,6 +1,11 @@
 # SonyHWXXES
 A Python3 class used for controlling a Sony VPL-HWXXES projector via serial connection. This has only been tested on a Sony VPL-HW40ES projector but should work for similar models (VPL-HW58ES, VPL-HW55ES, VPL-HW50ES, VPL-HW40ES, VPL-HW35ES). Since this has been tested in extremely limited capacity, use at your own risk!
 
+# Installation
+```
+> pip install sonyp_rs232c
+```
+
 # My Setup
 * Sony VPL-HW40ES Projector
 * Windows 10 HTPC

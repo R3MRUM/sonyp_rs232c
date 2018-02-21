@@ -560,35 +560,34 @@ class SonyHWXXES():
 
 	def rPowerOn(self):
 		if self.verbose: print("Turning Power On")
+
+		previousPhase = None
+		currentPhase = self.getStatusPower()
 		self.__sendCommand(self.__getCommand('Set', 'Power On'), response=False)
 
-		currentPhase = None
+		while True:
+			if currentPhase != previousPhase:
+				previousPhase = currentPhase
+				if self.verbose: print("Phase: %s" % currentPhase)
+				if currentPhase == 'Power On':
+					return True
+			currentPhase = self.getStatusPower()
+
+	def rPowerOff(self):
+		if self.verbose: print("Turning Power Off")
+
 		previousPhase = None
+		currentPhase = self.getStatusPower()
+		self.__sendCommand(self.__getCommand('Set', 'Power Off'), response=False)
 
 		while True:
 			currentPhase = self.getStatusPower()
 			if currentPhase != previousPhase:
 				previousPhase = currentPhase
 				if self.verbose: print("Phase: %s" % currentPhase)
-				if currentPhase == 'Power On':
-					return True
-
-	def rPowerOff(self):
-		if self.verbose: print("Turning Power Off")
-		self.__sendCommand(self.__getCommand('Set', 'Power Off'), response=False)
-
-		currentPhase = None
-		previousPhase = None
-
-		while True:
-			currentPhase = self.getStatusPower()
-			if currentPhase != previousPhase:
-				previousPhase = currentPhase
 				if currentPhase in ('Power Off', 'Standby'):
-					if self.verbose: print("Phase: %s" % currentPhase)
 					return True
-				else:
-					if self.verbose: print("Phase: %s" % currentPhase)
+			currentPhase = self.getStatusPower()
 
 	def rCursorUp(self):
 		self.__sendCommand(self.__getCommand('Set', 'Cursor Up'), response=False)

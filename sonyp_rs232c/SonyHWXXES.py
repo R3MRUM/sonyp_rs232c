@@ -425,6 +425,7 @@ class SonyHWXXES():
 			if not self.__serialObj.isOpen():
 				self.__serialObj.open()
 				#print('sending ' + binascii.hexlify(command).decode("utf-8") + ' to ' + self.__serialObj.name)
+			self.__serialObj.reset_input_buffer()
 			bwritten = self.__serialObj.write(command)
 			time.sleep(self.commandDelay)
 				#print("Bytes Written: %s" % bwritten)

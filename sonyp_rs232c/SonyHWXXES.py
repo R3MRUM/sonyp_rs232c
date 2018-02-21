@@ -5,8 +5,9 @@ import time
 class SonyHWXXES():
 
 	def __init__(self, port='COM1', baud=38400, bytesize=serial.EIGHTBITS, parity=serial.PARITY_EVEN,
-				 stopbits=serial.STOPBITS_ONE, timeout=3.2, verbose=False, commandDelay=.2):
+				 stopbits=serial.STOPBITS_ONE, timeout=3.2, verbose=False, debug=False, commandDelay=.2):
 		self.verbose=verbose
+		self.debug=debug
 		self.commandDelay=commandDelay
 
 		self.__itemList = {
@@ -395,6 +396,7 @@ class SonyHWXXES():
 		command += data
 		command += checksum
 		command += endCode
+		if self.debug: print('Command: {{ {cmd} }}'.format(cmd=', '.join('{:02x}'.format(x) for x in command)))
 		return command
 
 	def __getChecksum(self, action, item, data):
@@ -461,6 +463,8 @@ class SonyHWXXES():
 	    rcvData = bytes(result[4:6])
 	    checksum = bytes([result[6]])
 	    endCode= bytes([result[7]])
+
+	    if self.debug: print("Response: {{ {cmd} }}".format(cmd=', '.join('{:02x}'.format(x) for x in result)))
 
 	    if replyType == b'\x02':
 	        if itemAck in [contrast, brightness, color, hue, sharpness,

@@ -5,8 +5,9 @@ import time
 class SonyHWXXES():
 
 	def __init__(self, port='COM1', baud=38400, bytesize=serial.EIGHTBITS, parity=serial.PARITY_EVEN,
-				 stopbits=serial.STOPBITS_ONE, timeout=3.2, verbose=False, commandDelay=.2):
+				 stopbits=serial.STOPBITS_ONE, timeout=3.2, verbose=False, debug=False, commandDelay=.2):
 		self.verbose=verbose
+		self.debug=debug
 		self.commandDelay=commandDelay
 
 		self.__itemList = {
@@ -395,6 +396,7 @@ class SonyHWXXES():
 		command += data
 		command += checksum
 		command += endCode
+		if self.debug: print('Command: {{ {cmd} }}'.format(cmd=', '.join('{:02x}'.format(x) for x in command)))
 		return command
 
 	def __getChecksum(self, action, item, data):
@@ -425,6 +427,7 @@ class SonyHWXXES():
 			if not self.__serialObj.isOpen():
 				self.__serialObj.open()
 				#print('sending ' + binascii.hexlify(command).decode("utf-8") + ' to ' + self.__serialObj.name)
+			self.__serialObj.reset_input_buffer()
 			bwritten = self.__serialObj.write(command)
 			time.sleep(self.commandDelay)
 				#print("Bytes Written: %s" % bwritten)
@@ -460,6 +463,8 @@ class SonyHWXXES():
 	    rcvData = bytes(result[4:6])
 	    checksum = bytes([result[6]])
 	    endCode= bytes([result[7]])
+
+	    if self.debug: print("Response: {{ {cmd} }}".format(cmd=', '.join('{:02x}'.format(x) for x in result)))
 
 	    if replyType == b'\x02':
 	        if itemAck in [contrast, brightness, color, hue, sharpness,
@@ -555,35 +560,34 @@ class SonyHWXXES():
 
 	def rPowerOn(self):
 		if self.verbose: print("Turning Power On")
+
+		previousPhase = None
+		currentPhase = self.getStatusPower()
 		self.__sendCommand(self.__getCommand('Set', 'Power On'), response=False)
 
-		currentPhase = None
+		while True:
+			if currentPhase != previousPhase:
+				previousPhase = currentPhase
+				if self.verbose: print("Phase: %s" % currentPhase)
+				if currentPhase == 'Power On':
+					return True
+			currentPhase = self.getStatusPower()
+
+	def rPowerOff(self):
+		if self.verbose: print("Turning Power Off")
+
 		previousPhase = None
+		currentPhase = self.getStatusPower()
+		self.__sendCommand(self.__getCommand('Set', 'Power Off'), response=False)
 
 		while True:
 			currentPhase = self.getStatusPower()
 			if currentPhase != previousPhase:
 				previousPhase = currentPhase
 				if self.verbose: print("Phase: %s" % currentPhase)
-				if currentPhase == 'Power On':
-					return True
-
-	def rPowerOff(self):
-		if self.verbose: print("Turning Power Off")
-		self.__sendCommand(self.__getCommand('Set', 'Power Off'), response=False)
-
-		currentPhase = None
-		previousPhase = None
-
-		while True:
-			currentPhase = self.getStatusPower()
-			if currentPhase != previousPhase:
-				previousPhase = currentPhase
 				if currentPhase in ('Power Off', 'Standby'):
-					if self.verbose: print("Phase: %s" % currentPhase)
 					return True
-				else:
-					if self.verbose: print("Phase: %s" % currentPhase)
+			currentPhase = self.getStatusPower()
 
 	def rCursorUp(self):
 		self.__sendCommand(self.__getCommand('Set', 'Cursor Up'), response=False)
